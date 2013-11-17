@@ -1,0 +1,21 @@
+{
+  "name": "columns",
+  "repo": "JayceTDE/columns",
+  "description": "Fluid columns for different screen resolution",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+      "component/classes": "*",
+      "component/event": "*",
+      "jkroso/computed-style": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js"
+  ],
+  "styles": [
+    "columns.css"
+  ]
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <link rel="stylesheet" href="build/build.css" />
+        
+        <style>
+            
+            html, body {
+                margin: 0;
+            }
+            
+            #container {
+                width: 100%;
+            }
+            
+            #column1 {
+                width: 200px;
+                background: orange;
+            }
+            
+            #column2 {
+                width: 600px;
+                background: red;
+            }
+            
+            #column3 {
+                width: 200px;
+                background: blue;
+            }
+            
+            #column4 {
+                width: 200px;
+                background: green;
+            }
+            
+            html, body, .columns-container, .columns-scroller, .columns-column {
+                height: 100%;
+            }
+            
+        </style>
+    </head>
+    
+    <body>
+        
+        <div id="container">
+            
+            <div id="column1">
+                Column 1
+            </div>
+            
+            <div id="column2">
+                Column 2
+            </div>
+            
+            <div id="column3">
+                Column 3
+            </div>
+            
+            <div id="column4">
+                Column 4
+            </div>
+            
+        </div>
+        
+        <script src="build/build.js"></script>
+        <script>
+            var Columns = require('columns')
+              , cols = new Columns(document.getElementById('container'))
+            ;
+            
+            
+        </script>
+    </body>
+
+</html>

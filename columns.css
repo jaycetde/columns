@@ -1,0 +1,36 @@
+.columns-column {
+    display: inline-block;
+}
+
+.columns-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.columns-scroller {
+    white-space: nowrap;
+}
+
+.columns-left-overlay, .columns-right-overlay {
+    position: fixed;
+    top: 0;
+    height: 100%;
+    width: 10px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+}
+
+.columns-left-overlay {
+    left: 0;
+}
+
+.columns-right-overlay {
+    right: 0;
+}
+
+.hidden {
+    display: none;
+}

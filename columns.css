@@ -5,11 +5,35 @@
 .columns-container {
     position: relative;
     overflow: hidden;
+    text-align: center;
 }
 
 .columns-scroller {
     height: 100%;
     white-space: nowrap;
+}
+
+.columns-page-indicator {
+    position: fixed;
+    top: 10px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 1000;
+}
+
+.columns-page-indicator-bullet {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 8px;
+    background: #999;
+    border: 1px solid #000;
+    margin: 0 5px;
+}
+
+.columns-page-indicator-active {
+    background: #FFF;
 }
 
 .columns-left-overlay, .columns-right-overlay {
@@ -23,6 +47,8 @@
     -moz-user-select: none;
     -ms-user-select: none;
     -o-user-select: none;
+    background: #FFF;
+    opacity: 0;
 }
 
 .columns-left-overlay {
@@ -31,6 +57,10 @@
 
 .columns-right-overlay {
     right: 0;
+}
+
+.columns-left-overlay:hover, .columns-right-overlay:hover {
+    opacity: .25;
 }
 
 .hidden {

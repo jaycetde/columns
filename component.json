@@ -7,7 +7,7 @@
   "dependencies": {
       "component/classes": "*",
       "component/event": "*",
-      "jkroso/computed-style": "*"
+      "yields/empty": "*"
   },
   "development": {},
   "license": "MIT",

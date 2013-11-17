@@ -1,11 +1,15 @@
 var classes = require('classes')
   , events = require('event')
+  , empty = require('empty')
 
   , CONTAINER_CLASS = 'columns-container'
   , COLUMN_CLASS = 'columns-column'
   , SCROLLER_CLASS = 'columns-scroller'
   , LEFT_CLASS = 'columns-left-overlay'
   , RIGHT_CLASS = 'columns-right-overlay'
+  , PAGE_INDICATOR_CLASS = 'columns-page-indicator'
+  , PAGE_INDICATOR_BULLET_CLASS = 'columns-page-indicator-bullet'
+  , PAGE_INDICATOR_BULLET_ACTIVE_CLASS = 'columns-page-indicator-active'
 
   , SPACER_WIDTH = 10
 ;
@@ -28,6 +32,10 @@ function Columns(el) {
     
     this.el.appendChild(this.scroller);
     
+    this.pageIndicatorContainer = document.createElement('div');
+    this.pageIndicatorClasses = classes(this.pageIndicatorContainer);
+    this.pageIndicatorClasses.add(PAGE_INDICATOR_CLASS);
+    
     this.leftPageOverlay = document.createElement('div');
     this.leftPageClasses = classes(this.leftPageOverlay);
     this.leftPageClasses.add(LEFT_CLASS);
@@ -46,16 +54,66 @@ function Columns(el) {
         self.showPage(self.page + 1);
     });
     
+    this.el.appendChild(this.pageIndicatorContainer);
     this.el.appendChild(this.leftPageOverlay);
     this.el.appendChild(this.rightPageOverlay);
     
     this.setupPercentages();
     this.setupPages();
+    this.showPage(0);
     this.adjustWidths();
     
     events.bind(window, 'resize', this.resize.bind(this));
     
 }
+
+Columns.prototype.setupIndicator = function () {
+    
+    empty(this.pageIndicatorContainer);
+    
+    var i = 0
+      , l = this.pages.length
+    
+      , bullet
+    ;
+    
+    if (l === 1) return;
+    
+    while (i < l) {
+        
+        bullet = document.createElement('div');
+        bullet.className = PAGE_INDICATOR_BULLET_CLASS;
+        
+        this.pageIndicatorContainer.appendChild(bullet);
+        
+        i += 1;
+        
+    }
+    
+    this.setIndicator(this.page);
+    
+};
+
+Columns.prototype.setIndicator = function (page) {
+    
+    var self = this
+      , current = self.pageIndicatorContainer.querySelector('.' + PAGE_INDICATOR_BULLET_ACTIVE_CLASS)
+      , next = self.pageIndicatorContainer.querySelectorAll('.' + PAGE_INDICATOR_BULLET_CLASS)[page]
+    ;
+    
+    self.pageIndicatorClasses.remove('hidden');
+    
+    if (current) classes(current).remove(PAGE_INDICATOR_BULLET_ACTIVE_CLASS);
+    
+    if (next) classes(next).add(PAGE_INDICATOR_BULLET_ACTIVE_CLASS);
+    
+    clearTimeout(self._indicatorTimer);
+    
+    self._indicatorTimer = setTimeout(function () {
+        self.pageIndicatorClasses.add('hidden');
+    }, 3000);
+    
+};
 
 Columns.prototype.showPage = function (page) {
     
@@ -73,6 +131,8 @@ Columns.prototype.showPage = function (page) {
     if (page >= this.pages.length - 1) this.rightPageClasses.add('hidden'); 
     
     this.page = page;
+    
+    this.setIndicator(page);
     
 };
 
@@ -142,6 +202,7 @@ Columns.prototype.setupPages = function () {
     }
     
     this.adjustPages();
+    this.setupIndicator();
     
 };
 

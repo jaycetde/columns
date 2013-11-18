@@ -1,6 +1,7 @@
 var classes = require('classes')
   , events = require('event')
   , empty = require('empty')
+  , Swipe = require('swipe')
 
   , CONTAINER_CLASS = 'columns-container'
   , COLUMN_CLASS = 'columns-column'
@@ -67,9 +68,23 @@ function Columns(el) {
     this.showPage(0);
     this.adjustWidths();
     
+    this._swipe = new Swipe(this.el);
+    this._swipe.on('swipeleft', this.incPage.bind(this, 1));
+    this._swipe.on('swiperight', this.incPage.bind(this, -1));
+    
+    this.setSwipeThreshold();
+    
     events.bind(window, 'resize', this.resize.bind(this));
     
 }
+
+Columns.prototype.incPage = function (inc) {
+    this.showPage(this.page + inc);
+};
+
+Columns.prototype.setSwipeThreshold = function () {
+    this._swipe.threshold(this.el.offsetWidth * .5); // Set threshold to 50% of container width
+};
 
 Columns.prototype.setupIndicator = function () {
     
@@ -141,6 +156,7 @@ Columns.prototype.resize = function () {
         self.setupPages();
         self.adjustWidths();
         self.showPage(self.page);
+        self.setSwipeThreshold();
     }, 200);
 };
 

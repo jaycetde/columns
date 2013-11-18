@@ -18,6 +18,10 @@ module.exports = Columns;
 
 function Columns(el) {
     
+    if (!(this instanceof Columns)) {
+        return new Columns(el);
+    }
+    
     this.el = el;
     this.columns = [];
     this.page = 0;
@@ -71,24 +75,16 @@ Columns.prototype.setupIndicator = function () {
     
     empty(this.pageIndicatorContainer);
     
-    var i = 0
-      , l = this.pages.length
+    if (this.pages.length <= 1) return;
     
-      , bullet
-    ;
-    
-    if (l === 1) return;
-    
-    while (i < l) {
+    loop(this.pages, function (page) {
         
-        bullet = document.createElement('div');
+        var bullet = document.createElement('div');
         bullet.className = PAGE_INDICATOR_BULLET_CLASS;
         
         this.pageIndicatorContainer.appendChild(bullet);
         
-        i += 1;
-        
-    }
+    }, this);
     
     this.setIndicator(this.page);
     
@@ -150,16 +146,11 @@ Columns.prototype.resize = function () {
 
 Columns.prototype.setupPercentages = function () {
     
-    var cols = this.columns
-      , i = 0
-      , l = cols.length
-      , totalWidth = add(cols, 'width')
-    ;
+    var totalWidth = add(this.columns, 'width');
     
-    while (i < l) {
-        cols[i].percent = cols[i].width / totalWidth;
-        i += 1;
-    }
+    loop(this.columns, function (col) {
+        col.percent = col.width / totalWidth;
+    });
     
 };
 
@@ -208,83 +199,58 @@ Columns.prototype.setupPages = function () {
 
 Columns.prototype.adjustPages = function () {
     
-    var i = 0
-      , l = this.pages.length
+    var pages = this.pages
+      , columns = this.columns
     ;
     
-    while (i < l) {
-        
-        if ((this.pages[i].span === 1) && this.pages[i - 1]) {
-            if (this.columns[this.pages[i].start + this.pages[i].span - 1].width <= this.columns[this.pages[i - 1].start].width) {
-                this.pages[i].start = this.pages[i - 1].start + 1;
-                this.pages[i].span = this.pages[i - 1].span;
+    loop(pages, function (page, i) {
+        if ((page.span === 1) && pages[i - 1]) {
+            if (columns[page.start + page.span - 1].width <= columns[pages[i - 1].start].width) {
+                page.start = pages[i - 1].start + 1;
+                page.span = pages[i - 1].span;
             }
         }
-        
-        i += 1;
-    }
+    });
     
 };
 
 Columns.prototype.adjustWidths = function () {
     
     var containerWidth = this.el.offsetWidth
-      , widthWithSpacer
-      , pages = this.pages
-      , cols = this.columns
-      , i = 0
-      , l = pages.length
-      , j
-      , m
-      , totalPercent
+      , pagesLength = this.pages.length
     ;
     
-    while (i < l) {
+    if (pagesLength > 1) containerWidth -= SPACER_WIDTH;
+    
+    loop(this.pages, function (page, i) {
         
-        j = pages[i].start;
-        m = pages[i].start + pages[i].span;
+        var cols = this.columns.slice(page.start, page.start + page.span)
+          , totalPercent = add(cols, 'percent')
+          , widthWithSpacer = containerWidth
+        ;
         
-        totalPercent = add(cols.slice(j, m), 'percent');
+        if (i > 0 && i < (pagesLength - 1)) widthWithSpacer -= SPACER_WIDTH;
         
-        widthWithSpacer = containerWidth;
-        if (l > 1) widthWithSpacer -= SPACER_WIDTH;
-        if (i > 0 && i < l - 1) widthWithSpacer -= SPACER_WIDTH;
+        loop(cols, function (col) {
+            col.el.style.width = ((col.percent / totalPercent) * widthWithSpacer) + 'px';
+        });
         
-        while (j < m) {
-            
-            cols[j].el.style.width = ((cols[j].percent / totalPercent) * widthWithSpacer) + 'px';
-            
-            j += 1;
-            
-        }
-        
-        i += 1;
-    }
+    }, this);
     
 };
 
 Columns.prototype.extractColumns = function (el) {
     var children = el.childNodes
       , cols = []
-      , i = 0
-      , l = children.length
     ;
     
-    while (i < l) {
-        if (children[i].nodeType === 1) {
-            cols.push(children[i]);
-        }
-        i += 1;
-    }
+    loop(children, function (child) {
+        if (child.nodeType === 1) cols.push(child);
+    });
     
-    i = 0;
-    l = cols.length;
-    
-    while (i < l) {
-        this.addColumn(cols[i]);
-        i += 1;
-    }
-    
+    loop(cols, function (col) {
+        this.addColumn(col);
+    }, this);
 };
 
 Columns.prototype.addColumn = function (el, width) {
@@ -310,14 +276,21 @@ function Column(el, width) {
     
 }
 
-function add(arr, prop) {
+function loop (arr, fn, ctx) {
     var i = 0
       , l = arr.length
-      , t = 0
     ;
+    
     while (i < l) {
-        t += arr[i][prop]
+        fn.call(ctx, arr[i], i);
         i += 1;
     }
+}
+
+function add(arr, prop) {
+    var t = 0;
+    loop(arr, function (item) {
+        t += item[prop];
+    });
     return t;
 }

@@ -7,8 +7,7 @@
   "dependencies": {
       "component/classes": "*",
       "component/event": "*",
-      "yields/empty": "*",
-      "Swatinem/swipe": "*"
+      "yields/empty": "*"
   },
   "development": {},
   "license": "MIT",

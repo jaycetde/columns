@@ -232,7 +232,7 @@ Columns.prototype.adjustWidths = function () {
         if (i > 0 && i < (pagesLength - 1)) widthWithSpacer -= SPACER_WIDTH;
         
         loop(cols, function (col) {
-            col.el.style.width = ((col.percent / totalPercent) * widthWithSpacer) + 'px';
+            col.el.style.width = Math.round((col.percent / totalPercent) * widthWithSpacer) + 'px'; // fix - Math.round - decimal pixel values causing width problems
         });
         
     }, this);

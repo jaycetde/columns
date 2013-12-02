@@ -26,27 +26,19 @@ function Columns(el) {
     this.columns = [];
     this.page = 0;
     
-    this.elClasses = classes(el);
-    this.elClasses.add(CONTAINER_CLASS);
+    this.elClasses = classes(el).add(CONTAINER_CLASS);
     
     this.scroller = document.createElement('div');
     this.scroller.className = SCROLLER_CLASS;
     
-    this.extractColumns(this.el);
-    
-    this.el.appendChild(this.scroller);
-    
     this.pageIndicatorContainer = document.createElement('div');
-    this.pageIndicatorClasses = classes(this.pageIndicatorContainer);
-    this.pageIndicatorClasses.add(PAGE_INDICATOR_CLASS);
+    this.pageIndicatorClasses = classes(this.pageIndicatorContainer).add(PAGE_INDICATOR_CLASS);
     
     this.leftPageOverlay = document.createElement('div');
-    this.leftPageClasses = classes(this.leftPageOverlay);
-    this.leftPageClasses.add(LEFT_CLASS);
+    this.leftPageClasses = classes(this.leftPageOverlay).add(LEFT_CLASS);
     
     this.rightPageOverlay = document.createElement('div');
-    this.rightPageClasses = classes(this.rightPageOverlay);
-    this.rightPageClasses.add(RIGHT_CLASS);
+    this.rightPageClasses = classes(this.rightPageOverlay).add(RIGHT_CLASS);
     
     var self = this;
     
@@ -57,15 +49,6 @@ function Columns(el) {
     events.bind(this.rightPageOverlay, 'click', function () {
         self.showPage(self.page + 1);
     });
-    
-    this.el.appendChild(this.pageIndicatorContainer);
-    this.el.appendChild(this.leftPageOverlay);
-    this.el.appendChild(this.rightPageOverlay);
-    
-    this.setupPercentages();
-    this.setupPages();
-    this.showPage(0);
-    this.adjustWidths();
     
     events.bind(window, 'resize', this.resize.bind(this));
     
@@ -129,6 +112,7 @@ Columns.prototype.showPage = function (page) {
     this.page = page;
     
     this.setIndicator(page);
+    this.initializeColumns(this.pages[page]);
     
 };
 
@@ -240,6 +224,8 @@ Columns.prototype.adjustWidths = function () {
 };
 
 Columns.prototype.extractColumns = function (el) {
+    el = el || this.el;
+    
     var children = el.childNodes
       , cols = []
     ;
@@ -251,6 +237,8 @@ Columns.prototype.extractColumns = function (el) {
     loop(cols, function (col) {
         this.addColumn(col);
     }, this);
+    
+    return this;
 };
 
 Columns.prototype.addColumn = function (el, width) {
@@ -265,16 +253,53 @@ Columns.prototype.addColumn = function (el, width) {
     
 };
 
+Columns.prototype.initializeColumns = function (page) {
+    
+    var i = page.start
+      , l = i + page.span
+    ;
+    
+    while (i < l) {
+        this.columns[i].initialize();
+        i += 1;
+    }
+    
+};
+
+Columns.prototype.initialize = function () {
+    
+    this.el.appendChild(this.pageIndicatorContainer);
+    this.el.appendChild(this.leftPageOverlay);
+    this.el.appendChild(this.rightPageOverlay);
+    this.el.appendChild(this.scroller);
+    
+    this.setupPercentages();
+    this.setupPages();
+    this.showPage(0);
+    this.adjustWidths();
+    
+    return this;
+    
+};
+
 function Column(el, width) {
     
     this.el = el;
     this.width = width || el.offsetWidth; // unstyled div will have a width of 100%;
+    this._initialized = false;
     
     this.elClasses = classes(el);
     
     this.elClasses.add(COLUMN_CLASS);
     
 }
+
+Column.prototype.initialize = function () {
+    if (!this._initialized && this.init) {
+        this._initialized = true;
+        this.init();
+    }
+};
 
 function loop (arr, fn, ctx) {
     var i = 0

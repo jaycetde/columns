@@ -54,6 +54,12 @@ function Columns(el) {
     
 }
 
+Columns.prototype.reflow = function () {
+    this.setupPages();
+    this.adjustWidths();
+    this.showPage(this.page);
+};
+
 Columns.prototype.setupIndicator = function () {
     
     empty(this.pageIndicatorContainer);
@@ -101,7 +107,7 @@ Columns.prototype.showPage = function (page) {
     if (page < 0) return this.showPage(0);
     if (!this.pages[page]) return this.showPage(page - 1);
     
-    this.el.scrollLeft = this.columns[this.pages[page].start].el.offsetLeft - SPACER_WIDTH;
+    this.scroller.style.left = -(this.columns[this.pages[page].start].el.offsetLeft - (page === 0 ? 0 : SPACER_WIDTH)) + 'px';
     
     this.leftPageClasses.remove('hidden');
     this.rightPageClasses.remove('hidden');
@@ -117,15 +123,8 @@ Columns.prototype.showPage = function (page) {
 };
 
 Columns.prototype.resize = function () {
-    var self = this;
-    
-    clearTimeout(self._resizeTimer);
-    
-    self._resizeTimer = setTimeout(function () {
-        self.setupPages();
-        self.adjustWidths();
-        self.showPage(self.page);
-    }, 200);
+    clearTimeout(this._resizeTimer);
+    this._resizeTimer = setTimeout(this.reflow.bind(this), 200);
 };
 
 Columns.prototype.setupPercentages = function () {
@@ -260,7 +259,10 @@ Columns.prototype.initializeColumns = function (page) {
     ;
     
     while (i < l) {
-        this.columns[i].initialize();
+        if (!this.columns[i]._initialized) {
+            // TODO - initialize
+            this.columns[i]._initialized = true;
+        }
         i += 1;
     }
     
@@ -293,13 +295,6 @@ function Column(el, width) {
     this.elClasses.add(COLUMN_CLASS);
     
 }
-
-Column.prototype.initialize = function () {
-    if (!this._initialized && this.init) {
-        this._initialized = true;
-        this.init();
-    }
-};
 
 function loop (arr, fn, ctx) {
     var i = 0

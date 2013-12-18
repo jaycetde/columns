@@ -25,6 +25,7 @@
     right: 0;
     text-align: center;
     z-index: 1000;
+    pointer-events: none;
 }
 
 .columns-page-indicator-bullet {

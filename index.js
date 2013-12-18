@@ -259,10 +259,7 @@ Columns.prototype.initializeColumns = function (page) {
     ;
     
     while (i < l) {
-        if (!this.columns[i]._initialized) {
-            // TODO - initialize
-            this.columns[i]._initialized = true;
-        }
+        this.columns[i].initialize();
         i += 1;
     }
     
@@ -294,6 +291,13 @@ function Column(el, width) {
     
     this.elClasses.add(COLUMN_CLASS);
     
+}
+
+Column.prototype.initialize = function () {
+    if (!this._initialized) {
+        this.el.dispatchEvent(new Event('column-initialize'));
+        this._initialized = true;
+    }
 }
 
 function loop (arr, fn, ctx) {

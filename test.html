@@ -70,13 +70,14 @@
             ;
             
             for (var i = 1; i < 5; i += 1)(function (i) {
-                var c = cols.addColumn(document.getElementById('column' + i));
-                c.init = function () {
+                var colEl = document.getElementById('column' + i);
+                
+                colEl.addEventListener('column-initialize', function () {
                     console.log('initialized ' + i);
-                }
+                }, true);
             })(i);
             
-            cols.initialize();
+            cols.extractColumns().initialize();
             
         </script>
     </body>

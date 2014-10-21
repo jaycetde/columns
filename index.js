@@ -295,8 +295,9 @@ function Column(el, width) {
 
 Column.prototype.initialize = function () {
     if (!this._initialized) {
-        this.el.dispatchEvent(new Event('column-initialize'));
+        //this.el.dispatchEvent(new CustomEvent('column-initialize', { bubbles: false }));
         this._initialized = true;
+        if (this.onInitialize) this.onInitialize();
     }
 }
 

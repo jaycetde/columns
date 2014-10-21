@@ -69,14 +69,6 @@
               , cols = columns(document.getElementById('container'))
             ;
             
-            for (var i = 1; i < 5; i += 1)(function (i) {
-                var colEl = document.getElementById('column' + i);
-                
-                colEl.addEventListener('column-initialize', function () {
-                    console.log('initialized ' + i);
-                }, true);
-            })(i);
-            
             cols.extractColumns().initialize();
             
         </script>

@@ -244,8 +244,6 @@ Columns.prototype.addColumn = function (el, width) {
     
     var col = new Column(el, width);
     
-    this.scroller.appendChild(col.el);
-    
     this.columns.push(col);
     
     return col;
@@ -271,6 +269,13 @@ Columns.prototype.initialize = function () {
     this.el.appendChild(this.leftPageOverlay);
     this.el.appendChild(this.rightPageOverlay);
     this.el.appendChild(this.scroller);
+    
+    var i = 0, l = this.columns.length;
+    
+    while (i < l) {
+        this.scroller.appendChild(this.columns[i].el);
+        i += 1;
+    }
     
     this.setupPercentages();
     this.setupPages();

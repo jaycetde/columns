@@ -1,0 +1,16 @@
+{
+  "name": "columns",
+  "version": "0.0.2",
+  "description": "Fluid columns for different screen resolution",
+  "main": "index.js",
+  "dependencies": {},
+  "format": "es6",
+  "registry": "jspm",
+  "license": "MIT",
+  "jspm": true,
+  "devDependencies": {
+    "babel": "babel-core@^5.8.24",
+    "babel-runtime": "^5.8.24",
+    "core-js": "^1.1.4"
+  }
+}

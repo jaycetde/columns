@@ -1,26 +1,43 @@
-var classes = require('classes')
-  , events = require('event')
-  , empty = require('empty')
+import './style.css!';
 
-  , CONTAINER_CLASS = 'columns-container'
-  , COLUMN_CLASS = 'columns-column'
-  , SCROLLER_CLASS = 'columns-scroller'
-  , LEFT_CLASS = 'columns-left-overlay'
-  , RIGHT_CLASS = 'columns-right-overlay'
-  , PAGE_INDICATOR_CLASS = 'columns-page-indicator'
-  , PAGE_INDICATOR_BULLET_CLASS = 'columns-page-indicator-bullet'
-  , PAGE_INDICATOR_BULLET_ACTIVE_CLASS = 'columns-page-indicator-active'
+import classes from 'component-classes';
+import events from 'component-event';
+import empty from 'empty-element';
 
-  , SPACER_WIDTH = 10
+const CONTAINER_CLASS = 'columns-container',
+      COLUMN_CLASS = 'columns-column',
+      SCROLLER_CLASS = 'columns-scroller',
+      LEFT_CLASS = 'columns-left-overlay',
+      RIGHT_CLASS = 'columns-right-overlay',
+      PAGE_INDICATOR_CLASS = 'columns-page-indicator',
+      PAGE_INDICATOR_BULLET_CLASS = 'columns-page-indicator-bullet',
+      PAGE_INDICATOR_BULLET_ACTIVE_CLASS = 'columns-page-indicator-active',
+      
+      SPACER_WIDTH = 10
 ;
 
-module.exports = Columns;
-
-function Columns(el) {
+function loop (arr, fn, ctx) {
+    var i = 0
+      , l = arr.length
+    ;
     
-    if (!(this instanceof Columns)) {
-        return new Columns(el);
+    while (i < l) {
+        fn.call(ctx, arr[i], i);
+        i += 1;
     }
+}
+
+function add(arr, prop) {
+    var t = 0;
+    loop(arr, function (item) {
+        t += item[prop];
+    });
+    return t;
+}
+
+export default class Columns {
+  
+  constructor(el) {
     
     this.el = el;
     this.columns = [];
@@ -40,46 +57,48 @@ function Columns(el) {
     this.rightPageOverlay = document.createElement('div');
     this.rightPageClasses = classes(this.rightPageOverlay).add(RIGHT_CLASS);
     
-    var self = this;
+    const self = this;
     
     events.bind(this.leftPageOverlay, 'click', function () {
-        self.showPage(self.page - 1);
+      self.showPage(self.page - 1);
     });
     
     events.bind(this.rightPageOverlay, 'click', function () {
-        self.showPage(self.page + 1);
+      self.showPage(self.page + 1);
     });
     
     events.bind(window, 'resize', this.resize.bind(this));
-    
-}
-
-Columns.prototype.reflow = function () {
-    this.setupPages();
-    this.adjustWidths();
-    this.showPage(this.page);
-};
-
-Columns.prototype.setupIndicator = function () {
+  }
+  
+  reflow() {
+    if (!this.isFullscreen) {
+      this.setupPages();
+      this.adjustWidths();
+      this.showPage(this.page);
+    } else {
+      this.fullscreen(this._fullscreenIndex);
+    }
+  }
+  
+  setupIndicator() {
     
     empty(this.pageIndicatorContainer);
     
     if (this.pages.length <= 1) return;
     
     loop(this.pages, function (page) {
-        
-        var bullet = document.createElement('div');
-        bullet.className = PAGE_INDICATOR_BULLET_CLASS;
-        
-        this.pageIndicatorContainer.appendChild(bullet);
-        
+      
+      var bullet = document.createElement('div');
+      bullet.className = PAGE_INDICATOR_BULLET_CLASS;
+      
+      this.pageIndicatorContainer.appendChild(bullet);
+      
     }, this);
     
     this.setIndicator(this.page);
-    
-};
-
-Columns.prototype.setIndicator = function (page) {
+  }
+  
+  setIndicator(page) {
     
     var self = this
       , current = self.pageIndicatorContainer.querySelector('.' + PAGE_INDICATOR_BULLET_ACTIVE_CLASS)
@@ -98,10 +117,26 @@ Columns.prototype.setIndicator = function (page) {
         self.pageIndicatorClasses.add('hidden');
     }, 3000);
     
-};
-
-Columns.prototype.showPage = function (page) {
+  }
+  
+  fullscreen(columnIndex) {
+    const column = this.columns[columnIndex];
     
+    if (!column) return;
+    
+    column.el.style.width = this.el.offsetWidth + 'px';
+    this.scroller.style.left = -column.el.offsetLeft + 'px';
+    this.isFullscreen = true;
+    this._fullscreenIndex = columnIndex;
+  }
+  
+  exitFullscreen() {
+    this.isFullscreen = false;
+    this.reflow();
+  }
+  
+  showPage(page) {
+      
     page = page || 0;
     
     if (page < 0) return this.showPage(0);
@@ -119,15 +154,14 @@ Columns.prototype.showPage = function (page) {
     
     this.setIndicator(page);
     this.initializeColumns(this.pages[page]);
-    
-};
-
-Columns.prototype.resize = function () {
+  }
+  
+  resize() {
     clearTimeout(this._resizeTimer);
     this._resizeTimer = setTimeout(this.reflow.bind(this), 200);
-};
-
-Columns.prototype.setupPercentages = function () {
+  }
+  
+  setupPercentages() {
     
     var totalWidth = add(this.columns, 'width');
     
@@ -135,9 +169,9 @@ Columns.prototype.setupPercentages = function () {
         col.percent = col.width / totalWidth;
     });
     
-};
-
-Columns.prototype.setupPages = function () {
+  }
+  
+  setupPages() {
     
     this.pages = [];
     
@@ -178,9 +212,9 @@ Columns.prototype.setupPages = function () {
     this.adjustPages();
     this.setupIndicator();
     
-};
-
-Columns.prototype.adjustPages = function () {
+  }
+  
+  adjustPages() {
     
     var pages = this.pages
       , columns = this.columns
@@ -195,9 +229,9 @@ Columns.prototype.adjustPages = function () {
         }
     });
     
-};
-
-Columns.prototype.adjustWidths = function () {
+  }
+  
+  adjustWidths() {
     
     var containerWidth = this.el.offsetWidth
       , pagesLength = this.pages.length
@@ -220,9 +254,9 @@ Columns.prototype.adjustWidths = function () {
         
     }, this);
     
-};
-
-Columns.prototype.extractColumns = function (el) {
+  }
+  
+  extractColumns(el) {
     el = el || this.el;
     
     var children = el.childNodes
@@ -238,9 +272,9 @@ Columns.prototype.extractColumns = function (el) {
     }, this);
     
     return this;
-};
-
-Columns.prototype.addColumn = function (el, width) {
+  }
+  
+  addColumn(el, width) {
     
     var col = new Column(el, width);
     
@@ -248,9 +282,9 @@ Columns.prototype.addColumn = function (el, width) {
     
     return col;
     
-};
-
-Columns.prototype.initializeColumns = function (page) {
+  }
+  
+  initializeColumns(page) {
     
     var i = page.start
       , l = i + page.span
@@ -261,9 +295,9 @@ Columns.prototype.initializeColumns = function (page) {
         i += 1;
     }
     
-};
-
-Columns.prototype.initialize = function () {
+  }
+  
+  initialize() {
     
     this.el.appendChild(this.pageIndicatorContainer);
     this.el.appendChild(this.leftPageOverlay);
@@ -284,9 +318,12 @@ Columns.prototype.initialize = function () {
     
     return this;
     
-};
+  }
+  
+}
 
-function Column(el, width) {
+export class Column {
+  constructor(el, width) {
     
     this.el = el;
     this.width = width || el.offsetWidth; // unstyled div will have a width of 100%;
@@ -296,31 +333,13 @@ function Column(el, width) {
     
     this.elClasses.add(COLUMN_CLASS);
     
-}
-
-Column.prototype.initialize = function () {
+  }
+  
+  initialize() {
     if (!this._initialized) {
         //this.el.dispatchEvent(new CustomEvent('column-initialize', { bubbles: false }));
         this._initialized = true;
         if (this.onInitialize) this.onInitialize();
     }
-}
-
-function loop (arr, fn, ctx) {
-    var i = 0
-      , l = arr.length
-    ;
-    
-    while (i < l) {
-        fn.call(ctx, arr[i], i);
-        i += 1;
-    }
-}
-
-function add(arr, prop) {
-    var t = 0;
-    loop(arr, function (item) {
-        t += item[prop];
-    });
-    return t;
+  }
 }

@@ -1,5 +1,3 @@
-import './style.css!';
-
 import classes from 'component-classes';
 import events from 'component-event';
 import empty from 'empty-element';
